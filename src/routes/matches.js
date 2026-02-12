@@ -1,0 +1,48 @@
+import express from 'express'
+import {createMatchSchema} from '../validation/validation.js'
+import {db} from '../db/db.js'
+import {matches} from '../db/schema.js'
+const matchesrouter = express.Router()
+import {MATCH_STATUS} from '../validation/validation.js'
+import { getMatchStatus } from '../utils/match-status.js'
+
+matchesrouter.get('/',async(req,res)=>{
+    res.status(200).send({message:"hello from message route"})
+})
+matchesrouter.post('/data', async(req,res)=>{
+    console.log(req.body ,"this is req.body😊")
+    const parsed = createMatchSchema.safeParse(req.body)
+    console.log(parsed);
+    
+    if(!parsed.success){
+       return res.status(400).send({error:"invalid payload",detail:JSON.stringify(parsed.error)})
+    }
+
+    try {
+        const {data:{startTime,endTime,homeScore,awayScore}} = parsed
+        const [event] = await db.insert(matches).values({
+          ...parsed.data,
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+          homeScore: homeScore ?? 0,
+          awayScore: awayScore ?? 0,
+          status: getMatchStatus(startTime, endTime)
+        }).returning()
+
+        return res.status(200).send({data: event})
+    } catch (error) {
+console.log('this is error 😢',error);
+
+        return res.status(500).send({error:'failed to create a match',detail:error})
+         
+    }
+})
+
+
+matchesrouter.post('/test',async(req,res)=>{
+    const {text} = req.body
+    console.log(req.body);
+    
+    res.send(req.body)
+})
+export default matchesrouter
