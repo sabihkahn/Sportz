@@ -45,7 +45,7 @@ matchesrouter.post('/data', async(req,res)=>{
           endTime: new Date(endTime),
           homeScore: homeScore ?? 0,
           awayScore: awayScore ?? 0,
-          status: getMatchStatus(startTime, endTime)
+          status: getMatchStatus(startTime, endTime)  ?? 'scheduled'
         }).returning()
 
         return res.status(200).send({data: event})
