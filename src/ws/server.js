@@ -10,7 +10,7 @@ function sendSocket(socket,payload){
 function broadcast(wss,payload){
      
      for(const client of wss.clients){
-        if(client.readyState !== WebSocket.OPEN) return;
+        if(client.readyState !== WebSocket.OPEN) continue;
         client.send(JSON.stringify(payload))
      } 
       
@@ -26,6 +26,8 @@ export function attachwebsocketserver(server){
     })
 
   wss.on('connection',(socket)=>{
+    socket.isAlive = true
+    socket.on('pong',()=>{socket.isAlive = true })
     sendSocket(socket,{type:"welcome"})
     socket.on('error',(err)=>{
         console.log('error',err);
