@@ -1,9 +1,12 @@
 import express from 'express'
 import 'dotenv/config'
+import http from 'http'
 import matchesrouter from './routes/matches.js'
+import { attachwebsocketserver } from './ws/server.js'
 const app = express()
-
-
+const Port = Number(process.env.Port || 8000)
+const Host = '0.0.0.0'
+const server = http.createServer(app)
 // middlewar
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
@@ -15,8 +18,10 @@ app.get('/',async(req,res)=>{
     res.status(200).send({"message":"Welcome to server health 10/10"})
 })
 
+const {broadcastmatchcrated} = attachwebsocketserver(server)
+app.locals.broadcastmatchcrated = broadcastmatchcrated;
 
-app.listen(8000,()=>{
-    console.log('server is running on http://localhost:8000');
-    
+
+server.listen(Port,Host,()=>{
+    console.log(`server is running on http://localhost:${Port}`);
 })

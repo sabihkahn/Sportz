@@ -45,8 +45,11 @@ matchesrouter.post('/data', async(req,res)=>{
           endTime: new Date(endTime),
           homeScore: homeScore ?? 0,
           awayScore: awayScore ?? 0,
-          status: getMatchStatus(startTime, endTime)
+          status: getMatchStatus(startTime, endTime) ?? 'scheduled'
         }).returning()
+        if(res.app.locals.broadcastmatchcrated){
+             res.app.locals.broadcastmatchcrated(event)
+        }
 
         return res.status(200).send({data: event})
     } catch (error) {
